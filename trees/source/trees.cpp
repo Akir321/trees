@@ -23,6 +23,10 @@ int destroyNode(Node **nodePtr)
 
     Node *node = *nodePtr;
     
+    #if __USE_TYPE__ == STR
+    free (node->data);
+    #endif
+
     node->data  = Poison;
     node->left  = PtrPoison;
     node->right = PtrPoison;
@@ -183,6 +187,7 @@ Node *readNode(const char *buffer, int *position)
     int shift             = 0;
 
     sscanf(buffer + *position, "%s%n", word, &shift);
+    printf("word = %s\n", word);
 
     if (strncmp(word, "nil", 3) == 0)
     {
@@ -193,11 +198,24 @@ Node *readNode(const char *buffer, int *position)
     while (buffer[*position] != '(') { (*position)++; }
     (*position)++;
 
+    #if __USE_TYPE__ == STR
+    elem_t data = word;
+
+    if (!sscanf(buffer + *position, "%255[^*]%n", data, &shift)) return NULL;
+    printf("data = %s\n", data);
+    (*position) += shift + 1;
+
+    Node *node  = createNode(strdup(data), NULL, NULL);
+
+    #else
     elem_t data = 0;
     if (!sscanf(buffer + *position, ElemFormat "%n", &data, &shift)) return NULL;
     (*position) += shift;
 
     Node *node  = createNode(data, NULL, NULL);
+
+    #endif
+
     node->left  = readNode(buffer, position);
     node->right = readNode(buffer, position);
 

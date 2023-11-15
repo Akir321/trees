@@ -5,6 +5,11 @@
 #include "tree_graphic_dump.h"
 #include "trees.h"
 
+#if __USE_TYPE__ == STR
+#undef  ElemFormat
+#define ElemFormat "%s"
+#endif
+
 int treeGraphicDump(Tree *tree)
 {
     assert(tree);

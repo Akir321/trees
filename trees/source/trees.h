@@ -1,8 +1,33 @@
 #ifndef  __TREES_H__
 #define  __TREES_H__
 
+#define INT    1
+#define DOUBLE 2
+#define STR    3
+
+#define __USE_TYPE__ STR
+
+#if __USE_TYPE__ == INT
 typedef int elem_t;
+const int Poison = -1111111;
 #define ElemFormat "%d"
+
+#elif __USE_TYPE__ == DOUBLE
+typedef double elem_t;
+const double Poison = NAN;
+#define ElemFormat "%lg"
+
+#elif __USE_TYPE__ == STR
+typedef char* elem_t;
+char * const Poison = (char *)42;
+#define ElemFormat "%s*"
+
+#else
+typedef int elem_t;
+const int Poison = -1111111;
+#define ElemFormat "%d"
+
+#endif
 
 struct Node
 {
@@ -18,10 +43,9 @@ struct Tree
     int size;
 };
 
-const int Poison    = -1111111;
 Node * const PtrPoison = (Node *)42;
 
-const int WordLength = 64;
+const int WordLength = 256;
 
 
 
