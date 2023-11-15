@@ -34,3 +34,5 @@
 # Dumps
 *.dot
 *.png
+
+printed_tree.txt

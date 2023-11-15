@@ -39,6 +39,7 @@ int getAkinatorCommand()
 
         if (scanf("%c", &command) == 1)
         {
+            bufClear();
             gotCommand = command == GUESS     || command == DEFINITION   || command == COMPARE ||
                          command == EXIT_SAVE || command == EXIT_NO_SAVE || command == GRAPHIC_DUMP;
 
@@ -62,7 +63,17 @@ int processAkinatorCommand(Tree *objectTree, int command)
     {
         case GUESS:
             return commandAkinatorGuess(objectTree);
-        
+        case GRAPHIC_DUMP:
+        {
+            int dumpNumber = treeGraphicDump(objectTree);
+            char *cmdCommand = NULL;
+
+            __mingw_asprintf(&cmdCommand, "start gr_dump/tree_dump%d.dot.png", dumpNumber);
+            system(cmdCommand);
+            free(cmdCommand);
+
+            return EXIT_SUCCESS;
+        }
         case EXIT_SAVE:
         {
             FILE *f = fopen(dataBaseName, "w");
@@ -94,12 +105,15 @@ int commandAkinatorGuess(Tree *objectTree)
 
     while (current != NULL)
     {
+        answer   = 0;
         prevPrev = prev;
         prev     = current;
+
         printf("It (she/he) %s? [y/n]\n", current->data);
         while (answer != 'y' && answer != 'n') { answer = getchar(); }
         bufClear();
     
+        printf("%c\n", answer);
         if (answer == 'y') current = current->left;
         else               current = current->right;
     }
@@ -128,9 +142,10 @@ int commandAkinatorGuess(Tree *objectTree)
         Node *featureNode = createNode(strdup(word), objectNode, prev);
         printNode(featureNode, stdout);
 
-        if      (prevPrev == NULL)       objectTree->root = featureNode;
-        else if (prevPrev->left == prev) prevPrev->left   = featureNode;
-        else                             prevPrev->right  = featureNode;
+        if      (prevPrev == NULL)        objectTree->root = featureNode;
+        else if (prevPrev->left  == prev) prevPrev->left   = featureNode;
+        else if (prevPrev->right == prev) prevPrev->right  = featureNode;
+        else                              printf("ERROR: bad ptrs\n");
     }
             
     return EXIT_SUCCESS;

@@ -14,10 +14,11 @@ int treeGraphicDump(Tree *tree)
 {
     assert(tree);
 
-    static int dumpNumber = 1;
+    static int dumpNumber = 0;
+    dumpNumber++;
 
     char *fileName = NULL;
-    __mingw_asprintf(&fileName, "gr_dump/tree_dump%d.dot", dumpNumber++);
+    __mingw_asprintf(&fileName, "gr_dump/tree_dump%d.dot", dumpNumber);
 
     FILE *f = fopen(fileName, "w");
 
@@ -31,7 +32,7 @@ int treeGraphicDump(Tree *tree)
     free(fileName);
     free(command);
 
-    return 0;
+    return dumpNumber;
 }
 
 #define dotWrite(...) fprintf(f, __VA_ARGS__)
