@@ -22,11 +22,13 @@ LIB_OBJECT  =   $(LIB_OBJ_DIR)trees.o            \
 LIB_MAIN    =   $(LIB_OBJ_DIR)trees_test.o
 
 OBJECT      =   $(OBJ_DIR)akinator.o             \
-				$(OBJ_DIR)akinator_main.o     
+				$(OBJ_DIR)akinator_main.o        \
+				$(OBJ_DIR)stack.o
 
 INCLUDES    =   $(LIB_SRC_DIR)trees.h            \
 				$(LIB_SRC_DIR)tree_graphic_dump.h\
-				$(SRC_DIR)akinator.h
+				$(SRC_DIR)akinator.h             \
+				$(SRC_DIR)stack.h
 
 all: akinator
 
@@ -43,6 +45,9 @@ $(OBJ_DIR)akinator.o: $(SRC_DIR)akinator.cpp                           $(INCLUDE
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 
 $(OBJ_DIR)akinator_main.o: $(SRC_DIR)akinator_main.cpp                 $(INCLUDES)
+	$(CXX) -c $< -o $@ $(CXX_FLAGS)
+
+$(OBJ_DIR)stack.o: $(SRC_DIR)stack.cpp                                 $(INCLUDES)
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 
 $(LIB_OBJ_DIR)trees.o:             $(LIB_SRC_DIR)trees.cpp             $(INCLUDES)

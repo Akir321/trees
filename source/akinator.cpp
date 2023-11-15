@@ -6,6 +6,7 @@
 #include "../trees/source/trees.h"
 #include "../trees/source/tree_graphic_dump.h"
 #include "akinator.h"
+#include "stack.h"
 
 
 
@@ -63,6 +64,9 @@ int processAkinatorCommand(Tree *objectTree, int command)
     {
         case GUESS:
             return commandAkinatorGuess(objectTree);
+        
+        case DEFINITION:
+            return commandAkinatorDefinition(objectTree);
         case GRAPHIC_DUMP:
         {
             int dumpNumber = treeGraphicDump(objectTree);
@@ -149,6 +153,90 @@ int commandAkinatorGuess(Tree *objectTree)
     }
             
     return EXIT_SUCCESS;
+}
+
+#define STACK_VERIFY(stk)                      \
+    if (errorFieldToU(stackError(stk)))        \
+    {                                          \
+        printf("STACK CORRUPTED\n");           \
+        STACK_DUMP(stk);                       \
+        return errorFieldToU(stackError(stk)); \
+    }
+
+int commandAkinatorDefinition(Tree *objectTree)
+{
+    assert(objectTree);
+
+    stack choiceStack = {};
+    stackCtor(&choiceStack, 2);
+
+    printf("The definition of which object do you want?\n");
+
+    char objectName[WordLength] = {};
+    scanf("%255[^\n]", objectName);
+    bufClear();
+
+    if (treeFindNode(objectTree, objectName, &choiceStack))
+    {
+        printf("We can say about %s that it (she/he)", objectName);
+
+        Node *current = objectTree->root;
+        size_t stackPosition = 0;
+
+        while (stackPosition < choiceStack.size)
+        {
+            putchar('\n');
+
+            if (choiceStack.data[stackPosition] == RIGHT_NO) printf(" not"); 
+            printf(" %s ", current->data);
+
+            if (choiceStack.data[stackPosition] == RIGHT_NO) current = current->right;
+            else                                             current = current->left;
+
+            stackPosition++;
+        }
+        printf("\n\n");
+
+        stackDtor(&choiceStack);
+
+        return EXIT_SUCCESS;
+    }
+    else
+    {
+        printf("Sorry,  couldn't find the object. You might've misspelled it\n");
+        printf("or it is not present in the database.\n\n");
+
+        stackDtor(&choiceStack);
+
+        return EXIT_FAILURE;
+    }
+}
+
+bool treeFindNode(Tree *objectTree, char *objectName, stack *choiceStack)
+{
+    assert(objectTree);
+    assert(objectName);
+    STACK_VERIFY(choiceStack);
+
+    return findNode(objectTree->root, objectName, choiceStack);
+}
+
+bool findNode(Node *node, char *objectName, stack *choiceStack)
+{
+    if (!node)                               return false;
+    if (strcmp(objectName, node->data) == 0) return true;
+
+    stack_elem_t popValue = 0;
+
+    stackPush(choiceStack, LEFT_YES);
+    if (findNode(node->left, objectName, choiceStack)) return true;
+    stackPop(choiceStack, &popValue);
+
+    stackPush(choiceStack, RIGHT_NO);
+    if (findNode(node->right, objectName, choiceStack)) return true;
+    stackPop(choiceStack, &popValue);
+
+    return false;
 }
 
 void bufClear()
