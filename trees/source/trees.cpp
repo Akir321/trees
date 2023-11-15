@@ -187,7 +187,7 @@ Node *readNode(const char *buffer, int *position)
     int shift             = 0;
 
     sscanf(buffer + *position, "%s%n", word, &shift);
-    printf("word = %s\n", word);
+    //printf("word = %s\n", word);
 
     if (strncmp(word, "nil", 3) == 0)
     {
@@ -202,7 +202,7 @@ Node *readNode(const char *buffer, int *position)
     elem_t data = word;
 
     if (!sscanf(buffer + *position, "%255[^*]%n", data, &shift)) return NULL;
-    printf("data = %s\n", data);
+    //printf("data = %s\n", data);
     (*position) += shift + 1;
 
     Node *node  = createNode(strdup(data), NULL, NULL);

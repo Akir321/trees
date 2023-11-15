@@ -1,0 +1,1 @@
+(stinks* (werewolf* nil nil) (is dead* (faith* nil nil) (unclear what* nil nil)))
