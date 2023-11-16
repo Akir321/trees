@@ -5,6 +5,7 @@
 
 int main()
 {
+    putchar('\n');
     printf("## This program guesses objects based on their features\n");
     printf("## It can also make a definition of object or compare two objects\n\n");
 

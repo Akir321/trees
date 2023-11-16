@@ -67,6 +67,10 @@ int processAkinatorCommand(Tree *objectTree, int command)
         
         case DEFINITION:
             return commandAkinatorDefinition(objectTree);
+        
+        case COMPARE:
+            return commandAkinatorComparison(objectTree);
+
         case GRAPHIC_DUMP:
         {
             int dumpNumber = treeGraphicDump(objectTree);
@@ -94,7 +98,6 @@ int processAkinatorCommand(Tree *objectTree, int command)
         default:
             printf("ERROR: unknown command %c\n", command);
             return EXIT_FAILURE;
-        
     }
 }
 
@@ -113,18 +116,18 @@ int commandAkinatorGuess(Tree *objectTree)
         prevPrev = prev;
         prev     = current;
 
-        printf("It (she/he) %s? [y/n]\n", current->data);
+        printf("It (she/he) %s? [y/n] : ", current->data);
         while (answer != 'y' && answer != 'n') { answer = getchar(); }
         bufClear();
     
-        printf("%c\n", answer);
+        //printf("%c\n", answer);
         if (answer == 'y') current = current->left;
         else               current = current->right;
     }
 
     if (answer == 'y')
     {
-        printf("I knew it! Artificial intelligence is a lot smarter than humankind!\n");
+        printf("I knew it! Artificial intelligence rules!\n");
     }
     else
     {
@@ -170,11 +173,12 @@ int commandAkinatorDefinition(Tree *objectTree)
     stack choiceStack = {};
     stackCtor(&choiceStack, 2);
 
-    printf("The definition of which object do you want?\n");
+    printf("You  want the definition of: ");
 
     char objectName[WordLength] = {};
     scanf("%255[^\n]", objectName);
     bufClear();
+    putchar('\n');
 
     if (treeFindNode(objectTree, objectName, &choiceStack))
     {
@@ -203,7 +207,7 @@ int commandAkinatorDefinition(Tree *objectTree)
     }
     else
     {
-        printf("Sorry,  couldn't find the object. You might've misspelled it\n");
+        printf("Sorry, couldn't find the object. You might've misspelled it\n");
         printf("or it is not present in the database.\n\n");
 
         stackDtor(&choiceStack);
@@ -212,7 +216,133 @@ int commandAkinatorDefinition(Tree *objectTree)
     }
 }
 
-bool treeFindNode(Tree *objectTree, char *objectName, stack *choiceStack)
+int commandAkinatorComparison(Tree *objectTree)
+{
+    assert(objectTree);
+
+    stack choiceStack1 = {};
+    stackCtor(&choiceStack1, 2);
+
+    stack choiceStack2 = {};
+    stackCtor(&choiceStack2, 2);
+
+    printf("Which two objects do you want to compare?\n");
+
+    printf("Type the first  object: ");
+    char objectName1[WordLength] = {};
+    scanf("%255[^\n]", objectName1);
+    bufClear();
+
+    printf("Type the second object: ");
+    char objectName2[WordLength] = {};
+    scanf("%255[^\n]", objectName2);
+    bufClear();
+
+    putchar('\n');
+
+    if (treeFindNode(objectTree, objectName1, &choiceStack1) &&
+        treeFindNode(objectTree, objectName2, &choiceStack2))
+    {
+        writeObjectsComparison(objectTree, objectName1, &choiceStack1, objectName2, &choiceStack2);
+
+        stackDtor(&choiceStack1);
+        stackDtor(&choiceStack2);
+
+        return EXIT_SUCCESS;
+    }
+    else
+    {
+        char *notFound = NULL;
+
+        if (choiceStack1.size == 0) notFound = objectName1;
+        if (choiceStack2.size == 0) notFound = objectName2;
+
+        printf("Sorry, couldn't find the object: %s. You might've misspelled it ", notFound);
+        printf("or it is not present in the database.\n\n");
+
+        stackDtor(&choiceStack1);
+        stackDtor(&choiceStack2);
+
+        return EXIT_FAILURE;
+    }
+}
+
+int writeObjectsComparison(Tree *objectTree, 
+                           const char *objectName1, stack *choiceStack1,
+                           const char *objectName2, stack *choiceStack2)
+{
+    assert(objectTree);
+    assert(objectName1);
+    assert(objectName2);
+    STACK_VERIFY(choiceStack1);
+    STACK_VERIFY(choiceStack2);
+
+    if (choiceStack1->data[0] == choiceStack2->data[0])
+    {
+        printf("We can say about %s and %s that they both:", objectName1, objectName2);
+    }
+    else
+    {
+        printf("We can say that %s and %s don't share any features.", objectName1, objectName2);
+    }
+
+    Node *current = objectTree->root;
+    size_t stackPosition = 0;
+
+    while (choiceStack1->data[stackPosition] && 
+           choiceStack1->data[stackPosition] == choiceStack2->data[stackPosition])
+    {
+        putchar('\n');
+
+        if (choiceStack1->data[stackPosition] == RIGHT_NO) printf(" not"); 
+        printf(" %s ", current->data);
+
+        if (choiceStack1->data[stackPosition] == RIGHT_NO) current = current->right;
+        else                                               current = current->left;
+
+        stackPosition++;
+    }
+
+    size_t firstDifferentPosition = stackPosition;
+    Node  *firstDifferentNode     = current;
+
+    printf("\nBut %s:", objectName1);
+
+    while (stackPosition < choiceStack1->size)
+    {
+        putchar('\n');
+
+        if (choiceStack1->data[stackPosition] == RIGHT_NO) printf(" not"); 
+        printf(" %s", current->data);
+
+        if (choiceStack1->data[stackPosition] == RIGHT_NO) current = current->right;
+        else                                               current = current->left;
+
+        stackPosition++;
+    }
+
+    printf("\nAnd %s:", objectName2);
+    stackPosition = firstDifferentPosition;
+    current       = firstDifferentNode;
+
+    while (stackPosition < choiceStack2->size)
+    {
+        putchar('\n');
+
+        if (choiceStack2->data[stackPosition] == RIGHT_NO) printf(" not"); 
+        printf(" %s", current->data);
+
+        if (choiceStack2->data[stackPosition] == RIGHT_NO) current = current->right;
+        else                                               current = current->left;
+
+        stackPosition++;
+    }
+    printf("\n\n");
+    
+    return EXIT_SUCCESS;
+}
+
+bool treeFindNode(Tree *objectTree, const char *objectName, stack *choiceStack)
 {
     assert(objectTree);
     assert(objectName);
@@ -221,7 +351,7 @@ bool treeFindNode(Tree *objectTree, char *objectName, stack *choiceStack)
     return findNode(objectTree->root, objectName, choiceStack);
 }
 
-bool findNode(Node *node, char *objectName, stack *choiceStack)
+bool findNode(Node *node, const char *objectName, stack *choiceStack)
 {
     if (!node)                               return false;
     if (strcmp(objectName, node->data) == 0) return true;

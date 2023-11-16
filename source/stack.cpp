@@ -205,7 +205,7 @@ stackErrorField stackPop(stack *stk, stack_elem_t *returnValue)
     if (error.realloc_failed) return error;
 
     *returnValue = stk->data[--stk->size];
-    //stk->data[stk->size] = 0;
+    stk->data[stk->size] = 0;
 
     HASH_PROTECTION (
         stk->hash = stackHashCalc(stk);

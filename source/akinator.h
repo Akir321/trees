@@ -29,9 +29,15 @@ int processAkinatorCommand(Tree *objectTree, int command);
 
 int commandAkinatorGuess     (Tree *objectTree);
 int commandAkinatorDefinition(Tree *objectTree);
+int commandAkinatorComparison(Tree *objectTree);
 
-bool treeFindNode(Tree *objectTree, char *objectName, stack *choiceStack);
-bool findNode    (Node *node,       char *objectName, stack *choiceStack);
+int writeObjectsComparison(Tree *objectTree, 
+                           const char *objectName1, stack *choiceStack1,
+                           const char *objectName2, stack *choiceStack2);
+
+
+bool treeFindNode(Tree *objectTree, const char *objectName, stack *choiceStack);
+bool findNode    (Node *node,       const char *objectName, stack *choiceStack);
 
 void bufClear(void);
 
