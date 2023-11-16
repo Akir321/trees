@@ -1,1 +1,1 @@
-(stinks* (werewolf* nil nil) (is dead* (faith* nil nil) (unclear what* nil nil)))
+(stinks* (werewolf* nil nil) (is dead* (faith* nil nil) (is for prog* (computer* nil nil) (unclear what* nil nil))))

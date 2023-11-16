@@ -184,21 +184,7 @@ int commandAkinatorDefinition(Tree *objectTree)
     {
         printf("We can say about %s that it (she/he)", objectName);
 
-        Node *current = objectTree->root;
-        size_t stackPosition = 0;
-
-        while (stackPosition < choiceStack.size)
-        {
-            putchar('\n');
-
-            if (choiceStack.data[stackPosition] == RIGHT_NO) printf(" not"); 
-            printf(" %s ", current->data);
-
-            if (choiceStack.data[stackPosition] == RIGHT_NO) current = current->right;
-            else                                             current = current->left;
-
-            stackPosition++;
-        }
+        writeObjectFeatures(objectTree, objectTree->root, &choiceStack, 0);
         printf("\n\n");
 
         stackDtor(&choiceStack);
@@ -207,7 +193,7 @@ int commandAkinatorDefinition(Tree *objectTree)
     }
     else
     {
-        printf("Sorry, couldn't find the object. You might've misspelled it\n");
+        printf("Sorry, couldn't find the object: %s. You might've misspelled it ", objectName);
         printf("or it is not present in the database.\n\n");
 
         stackDtor(&choiceStack);
@@ -303,41 +289,33 @@ int writeObjectsComparison(Tree *objectTree,
         stackPosition++;
     }
 
-    size_t firstDifferentPosition = stackPosition;
-    Node  *firstDifferentNode     = current;
-
     printf("\nBut %s:", objectName1);
-
-    while (stackPosition < choiceStack1->size)
-    {
-        putchar('\n');
-
-        if (choiceStack1->data[stackPosition] == RIGHT_NO) printf(" not"); 
-        printf(" %s", current->data);
-
-        if (choiceStack1->data[stackPosition] == RIGHT_NO) current = current->right;
-        else                                               current = current->left;
-
-        stackPosition++;
-    }
+    writeObjectFeatures(objectTree, current, choiceStack1, stackPosition);
 
     printf("\nAnd %s:", objectName2);
-    stackPosition = firstDifferentPosition;
-    current       = firstDifferentNode;
+    writeObjectFeatures(objectTree, current, choiceStack2, stackPosition);
+    printf("\n\n");
+    
+    return EXIT_SUCCESS;
+}
 
-    while (stackPosition < choiceStack2->size)
+int writeObjectFeatures(Tree *objectTree, Node *current, stack *choiceStack, size_t stackPosition)
+{
+    assert(objectTree);
+    STACK_VERIFY(choiceStack);
+
+    while (stackPosition < choiceStack->size)
     {
         putchar('\n');
 
-        if (choiceStack2->data[stackPosition] == RIGHT_NO) printf(" not"); 
-        printf(" %s", current->data);
+        if (choiceStack->data[stackPosition] == RIGHT_NO) printf(" not"); 
+        printf(" %s ", current->data);
 
-        if (choiceStack2->data[stackPosition] == RIGHT_NO) current = current->right;
-        else                                               current = current->left;
+        if (choiceStack->data[stackPosition] == RIGHT_NO) current = current->right;
+        else                                             current = current->left;
 
         stackPosition++;
     }
-    printf("\n\n");
     
     return EXIT_SUCCESS;
 }

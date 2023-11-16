@@ -31,6 +31,7 @@ int commandAkinatorGuess     (Tree *objectTree);
 int commandAkinatorDefinition(Tree *objectTree);
 int commandAkinatorComparison(Tree *objectTree);
 
+int writeObjectFeatures   (Tree *objectTree, Node *current, stack *choiceStack, size_t stackPosition);
 int writeObjectsComparison(Tree *objectTree, 
                            const char *objectName1, stack *choiceStack1,
                            const char *objectName2, stack *choiceStack2);
