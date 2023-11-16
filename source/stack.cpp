@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "stack.h"
+#include "html_logfile.h"
 
 #define STACK_VERIFY \
 if (errorFieldToU(stackError(stk))) \
@@ -111,25 +112,25 @@ stackErrorField stackDtor(stack *stk)
 stackErrorField stackDump(stack *stk, const char *file, int line, const char *function)
 {
     assert(stk);
-    printf("I'm stackDump called from %s (%d) %s\n", function, line, file);
+    LOG("I'm stackDump called from %s (%d) %s\n", function, line, file);
     stackErrorField error = stackError(stk);
     printStackErrors(error);
 
-    printf(" capacity = %lld\n size = %lld\n", stk->capacity, stk->size);
+    LOG(" capacity = %lld\n size = %lld\n", stk->capacity, stk->size);
 
     HASH_PROTECTION (
-        printf(" hash = %u\n", stk->hash);
+        LOG(" hash = %u\n", stk->hash);
     )
 
     CANARY_PROTECTION (
-        printf("stackCanary1  = 0x%llx\n", stk->stackCanary1);
-        printf("stackCanary2  = 0x%llx\n", stk->stackCanary2);
+        LOG("stackCanary1  = 0x%llx\n", stk->stackCanary1);
+        LOG("stackCanary2  = 0x%llx\n", stk->stackCanary2);
     )
 
-    printf(" data[%p] = ", stk->data);
+    LOG(" data[%p] = ", stk->data);
     if (!stk->data)
     {
-        printf("NULL\n");
+        LOG("NULL\n");
         return error;
     }
     putchar('\n');
@@ -139,36 +140,38 @@ stackErrorField stackDump(stack *stk, const char *file, int line, const char *fu
          && i < stk->capacity
          && i < LAST_PRINTED; i++)
     {
-        printf("   ");
+        LOG("   ");
         if (i < stk->size) putchar('*');
         else               putchar(' ');
-        printf("[%lld] = " elemFormat "\n", i, stk->data[i]);
+        LOG("[%lld] = " elemFormat "\n", i, stk->data[i]);
     }
 
     CANARY_PROTECTION (
         unsigned long long buf_canary = *((unsigned long long *)stk->data - 1);
-        printf("bufferCanary1 = 0x%llx\n", buf_canary);
+        LOG("bufferCanary1 = 0x%llx\n", buf_canary);
         buf_canary = *(unsigned long long *)(stk->data + stk->capacity);
-        printf("bufferCanary2 = 0x%llx\n", buf_canary);
+        LOG("bufferCanary2 = 0x%llx\n", buf_canary);
     )
+
+    LOG("\n\n");
 
     return error;
 }
 
 void printStackErrors(stackErrorField error)
 {
-    if (error.stack_null)       printf("ERROR: stack_null     = 1\n");
-    if (error.data_null)        printf("ERROR: data_null      = 1\n");
-    if (error.small_capacity)   printf("ERROR: small_capacity = 1\n");
-    if (error.anti_overflow)    printf("ERROR: anti_overflow  = 1\n");
-    if (error.realloc_failed)   printf("ERROR: realloc_failed = 1\n");
+    if (error.stack_null)       LOG("ERROR: stack_null     = 1\n");
+    if (error.data_null)        LOG("ERROR: data_null      = 1\n");
+    if (error.small_capacity)   LOG("ERROR: small_capacity = 1\n");
+    if (error.anti_overflow)    LOG("ERROR: anti_overflow  = 1\n");
+    if (error.realloc_failed)   LOG("ERROR: realloc_failed = 1\n");
 
     CANARY_PROTECTION (
-        if (error.changed_canary)   printf("changed_canary = 1\n");
+        if (error.changed_canary)   LOG("changed_canary = 1\n");
     )
 
     HASH_PROTECTION (
-        if (error.changed_hash)     printf("changed_hash   = 1\n");
+        if (error.changed_hash)     LOG("changed_hash   = 1\n");
     )
 }
 
@@ -218,9 +221,9 @@ stackErrorField stackRealloc(stack *stk)
 {
     STACK_VERIFY;
 
-    //printf("i'm stackRealloc\n");
-    //printf("capacity = %lld\nsize = %lld\n", stk->capacity, stk->size);
-    //printf("start reallocing\n");
+    LOG("i'm stackRealloc\n");
+    LOG("capacity = %lld\nsize = %lld\n", stk->capacity, stk->size);
+    LOG("start reallocing\n");
 
     stackErrorField error = {};
 
@@ -251,8 +254,10 @@ stackErrorField stackRealloc(stack *stk)
         *(unsigned long long *)(stk->data + stk->capacity) = BUF_CANARY;
     )
 
-    //printf("realloc finished\n");
-    //printf("new capacity = %lld\nnew size = %lld\n", stk->capacity, stk->size);
+    LOG("realloc finished\n");
+    LOG("new capacity = %lld\nnew size = %lld\n", stk->capacity, stk->size);
+    LOG("\n\n");
+    
     return error;
 }
 

@@ -4,6 +4,7 @@
 
 #include "tree_graphic_dump.h"
 #include "trees.h"
+#include "../../source/html_logfile.h"
 
 #if __USE_TYPE__ == STR
 #undef  ElemFormat
@@ -27,6 +28,7 @@ int treeGraphicDump(Tree *tree)
 
     char *command = NULL;
     __mingw_asprintf(&command, "dot %s -T png -o %s.png", fileName, fileName);
+    LOG("\n<img src = ../%s.png width = 50%%>\n",  fileName);
 
     system(command);
     free(fileName);

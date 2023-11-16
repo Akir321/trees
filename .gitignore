@@ -35,4 +35,7 @@
 *.dot
 *.png
 
+# Logs
+*.html
+
 printed_tree.txt

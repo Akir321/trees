@@ -3,7 +3,8 @@
 
 #include "stack.h"
 
-const char * const dataBaseName = "data_base.txt";
+const char * const dataBaseName    = "data_base.txt";
+const char * const defaultDataBase = "(unclear what* nil nil)";
 
 enum AkinatorCommands
 {
@@ -11,7 +12,7 @@ enum AkinatorCommands
     DEFINITION   = 'd',
     COMPARE      = 'c',
     EXIT_SAVE    = 's',
-    EXIT_NO_SAVE = 'w',
+    EXIT_NO_SAVE = 'e',
     GRAPHIC_DUMP = 'o',
 };
 
@@ -20,6 +21,8 @@ enum DirectionChoice
     RIGHT_NO = 1,
     LEFT_YES = 2,
 };
+
+int dataBaseReverse(void);
 
 int runAkinator(Tree *objectTree);
 

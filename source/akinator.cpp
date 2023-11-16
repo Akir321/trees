@@ -7,6 +7,7 @@
 #include "../trees/source/tree_graphic_dump.h"
 #include "akinator.h"
 #include "stack.h"
+#include "html_logfile.h"
 
 
 
@@ -16,7 +17,7 @@ int runAkinator(Tree *objectTree)
 
     int command = 0;
 
-    while (command != 's' && command != 'w')
+    while (command != EXIT_SAVE && command != EXIT_NO_SAVE)
     {
         command = getAkinatorCommand();
         processAkinatorCommand(objectTree, command);
@@ -30,16 +31,17 @@ int getAkinatorCommand()
     printf("What do you want to do?\n\n");
 
     bool gotCommand = false;
-    char command     = 0;
+    char command    = 0;
 
     do 
     {
         printf("The program can [g]uess an object, make a [d]efinition of one object,\n");
-        printf("[c]ompare two objects, show a picture of the [o]bject tree,\n\n");
-        printf("You can also exit with [s]ave or exit [w]ithout save.\n\n");
+        printf("[c]ompare two objects, show a picture of the [o]bject tree.\n\n");
+        printf("You can also exit with [s]ave or [e]xit without save.\n\n");
 
         if (scanf("%c", &command) == 1)
         {
+            LOG("command = %c(%d)\n", command, command);
             bufClear();
             gotCommand = command == GUESS     || command == DEFINITION   || command == COMPARE ||
                          command == EXIT_SAVE || command == EXIT_NO_SAVE || command == GRAPHIC_DUMP;
@@ -120,7 +122,7 @@ int commandAkinatorGuess(Tree *objectTree)
         while (answer != 'y' && answer != 'n') { answer = getchar(); }
         bufClear();
     
-        //printf("%c\n", answer);
+        LOG("answer = %c\n", answer);
         if (answer == 'y') current = current->left;
         else               current = current->right;
     }
@@ -131,23 +133,23 @@ int commandAkinatorGuess(Tree *objectTree)
     }
     else
     {
-        char word[WordLength] = {};
+        char scannedWord[WordLength] = "";
 
         printf("So then I'm wrong. But what was it?\n");
-        scanf("%255[^\n]", word);
+        scanf("%255[^\n]", scannedWord);
         bufClear();
-        printf("object = %s\n", word);
+        LOG("object = \"%s\"\n", scannedWord);
 
-        Node *objectNode = createNode(strdup(word), NULL, NULL);
-        printNode(objectNode, stdout);
+        Node *objectNode = createNode(strdup(scannedWord), NULL, NULL);
+        //printNode(objectNode, stdout);
 
         printf("How is it different from %s? It (she/he) ...\n", prev->data);
-        scanf("%255[^\n]", word);
+        scanf("%255[^\n]", scannedWord);
         bufClear();
-        printf("feature = %s\n", word);
+        LOG("feature = \"%s\"\n", scannedWord);
 
-        Node *featureNode = createNode(strdup(word), objectNode, prev);
-        printNode(featureNode, stdout);
+        Node *featureNode = createNode(strdup(scannedWord), objectNode, prev);
+        //printNode(featureNode, stdout);
 
         if      (prevPrev == NULL)        objectTree->root = featureNode;
         else if (prevPrev->left  == prev) prevPrev->left   = featureNode;
@@ -173,16 +175,16 @@ int commandAkinatorDefinition(Tree *objectTree)
     stack choiceStack = {};
     stackCtor(&choiceStack, 2);
 
-    printf("You  want the definition of: ");
+    printf("You want the definition of: ");
 
-    char objectName[WordLength] = {};
+    char objectName[WordLength] = "";
     scanf("%255[^\n]", objectName);
     bufClear();
     putchar('\n');
 
     if (treeFindNode(objectTree, objectName, &choiceStack))
     {
-        printf("We can say about %s that it (she/he)", objectName);
+        printf("We can say that %s:", objectName);
 
         writeObjectFeatures(objectTree, objectTree->root, &choiceStack, 0);
         printf("\n\n");
@@ -215,12 +217,14 @@ int commandAkinatorComparison(Tree *objectTree)
     printf("Which two objects do you want to compare?\n");
 
     printf("Type the first  object: ");
-    char objectName1[WordLength] = {};
+    char objectName1[WordLength] = "";
+
     scanf("%255[^\n]", objectName1);
     bufClear();
 
     printf("Type the second object: ");
-    char objectName2[WordLength] = {};
+    char objectName2[WordLength] = "";
+
     scanf("%255[^\n]", objectName2);
     bufClear();
 
@@ -229,6 +233,9 @@ int commandAkinatorComparison(Tree *objectTree)
     if (treeFindNode(objectTree, objectName1, &choiceStack1) &&
         treeFindNode(objectTree, objectName2, &choiceStack2))
     {
+        STACK_DUMP(&choiceStack1);
+        STACK_DUMP(&choiceStack2);
+
         writeObjectsComparison(objectTree, objectName1, &choiceStack1, objectName2, &choiceStack2);
 
         stackDtor(&choiceStack1);
@@ -345,6 +352,30 @@ bool findNode(Node *node, const char *objectName, stack *choiceStack)
     stackPop(choiceStack, &popValue);
 
     return false;
+}
+
+int dataBaseReverse()
+{
+    printf("Unfortunately, the dataBase was currupted.\n");
+    printf("Do you want to reverse it to the initial condition? [y/n] : ");
+
+    int command = 0;
+    while (command != 'n' && command != 'y') { command = getchar(); }
+    bufClear();
+
+    if (command == 'n')
+    {
+        printf("Then we cannot work with you. You have to fix it yourself!\n\n");
+        return EXIT_FAILURE;
+    }
+
+    FILE *f = fopen(dataBaseName, "w");
+    fputs(defaultDataBase, f);
+    fclose(f);
+
+    printf("Your dataBase is reversed. Start filling it up right now!\n\n");
+
+    return EXIT_SUCCESS;
 }
 
 void bufClear()
